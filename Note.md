@@ -18,5 +18,5 @@
 ## clotral
 
 ## Foundry
-## vite.js
+## vite.js || Next.js
 >>>>>>> 99e0052c5356d356d3f3fdc4f9d4c8f246d09aa0
