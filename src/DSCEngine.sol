@@ -10,8 +10,14 @@ pragma solidity ^0.8.18;
  * - Exogenous Collateral
  * - Dollar Pegged
  * - Algorithmically Stable
-
+ *
+ * Our DSC system should always be "overcollateriat
  * @notice This contract is the core of the DSE System. it handles all the logic for minting and burning also redeeming DSC.+ depositing and withdrawing collateral.
 */
 
-contract DSCEngine{}
+contract DSCEngine{
+    function depositCollateralAndMintDsc() external {}
+    function redeemCollateralForDsc() external {}
+    function burnDsc() external {}
+    
+}
