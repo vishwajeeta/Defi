@@ -24,6 +24,7 @@ contract DSCEngine {
         if(amount==0){
             revert DSCEngine__NeedsMoreThanZero();
         }
+        _;
     }
     function depositCollateralAndMintDsc() external {}
 
