@@ -36,7 +36,7 @@ contract DSCEngine {
     function depositCollateral(
         address tokenCollateralAddress,
         uint256 amountCollateral
-    ) external {}
+    ) external moreThanZero(amountCollateral) {}
     function redeemCollateralForDsc() external {}
     function redeemCollateral() external {}
     function mintDsc() external {}
