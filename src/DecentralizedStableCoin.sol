@@ -10,33 +10,35 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  * Relative Stability:pegged to USD
  * governed by DSCEngine.
  */
-contract DecentralizedStableCoin is ERC20Burnable, Ownable{
-
+contract DecentralizedStableCoin is ERC20Burnable, Ownable {
     error DecentralizedStableCoin_MustBeMoreThanZero();
     error DecentralizedStableCoin_BurnAmountExceedsBalance();
     error DecentralizedStableCoin_NotZeroAddress();
 
-    constructor() ERC20("DecentralizedStableCoin","DSC"){}
+    constructor() ERC20("DecentralizedStableCoin", "DSC") {}
 
-    function burn(uint256 _amount)public override onlyOwner{
+    function burn(uint256 _amount) public override onlyOwner {
         uint256 balance = balanceOf(msg.sender);
-        if(_amount <=0){
+        if (_amount <= 0) {
             revert DecentralizedStableCoin_MustBeMoreThanZero();
         }
-        if(balance < _amount){
+        if (balance < _amount) {
             revert DecentralizedStableCoin_BurnAmountExceedsBalance();
         }
         super.burn(_amount);
     }
 
-    function mint(address _to,uint256 _amount)external onlyOwner returns(bool){
-        if(_to == address(0)){
+    function mint(
+        address _to,
+        uint256 _amount
+    ) external onlyOwner returns (bool) {
+        if (_to == address(0)) {
             revert DecentralizedStableCoin_NotZeroAddress();
         }
-        if(_amount <= 0){
+        if (_amount <= 0) {
             revert DecentralizedStableCoin_MustBeMoreThanZero();
         }
-        _mint(_to,_amount);
+        _mint(_to, _amount);
         return true;
     }
 }
