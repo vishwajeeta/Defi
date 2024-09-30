@@ -26,6 +26,7 @@ contract DSCEngine {
         }
         _;
     }
+    //----------------External functions---------------
     function depositCollateralAndMintDsc() external {}
 
     /**
