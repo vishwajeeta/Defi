@@ -19,6 +19,8 @@ contract DSCEngine {
 
     //----------------Errors-------------------------
     error DSCEngine__NeedsMoreThanZero();
+    //----------------State variable-----------------
+    mapping (address token =>address priceFeed) s_priceFeeds; // tokenToPriceFeed
     //----------------Modifiers-----------------------
     modifier moreThanZero(uint256 amount){
         if(amount==0){
