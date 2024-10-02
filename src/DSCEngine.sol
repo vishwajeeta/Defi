@@ -26,6 +26,7 @@ contract DSCEngine is ReentrancyGuard {
 
     //----------------State variable-----------------
     mapping (address token =>address priceFeed) s_priceFeeds; // tokenToPriceFeed
+    mapping (address user => mapping(address token => uint256 amount)) private s_collateralDeposited;
 
 
     DecentralizedStableCoin private immutable i_dsc;
