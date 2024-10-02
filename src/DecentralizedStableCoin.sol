@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
+
 import {ERC20Burnable, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-/*
+/**
  * @title Decentralized-Stable-Coin
  * @author vishwa
  * Collateral: Exogenous (ETH & BTC)
@@ -10,6 +11,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  * Relative Stability:pegged to USD
  * governed by DSCEngine.
  */
+
 contract DecentralizedStableCoin is ERC20Burnable, Ownable {
     error DecentralizedStableCoin_MustBeMoreThanZero();
     error DecentralizedStableCoin_BurnAmountExceedsBalance();
@@ -28,10 +30,7 @@ contract DecentralizedStableCoin is ERC20Burnable, Ownable {
         super.burn(_amount);
     }
 
-    function mint(
-        address _to,
-        uint256 _amount
-    ) external onlyOwner returns (bool) {
+    function mint(address _to, uint256 _amount) external onlyOwner returns (bool) {
         if (_to == address(0)) {
             revert DecentralizedStableCoin_NotZeroAddress();
         }
