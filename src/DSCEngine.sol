@@ -23,7 +23,7 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__NeedsMoreThanZero();
     error DSCEngine__TokenAddressAndPriceFeedAddressesMustBeSameLength();
     error DSCEngine_NotAllowedToken();
-    error DSCEngine__TransferFailed()
+    error DSCEngine__TransferFailed();
 
     //----------------State variable-----------------
     mapping(address token => address priceFeed) s_priceFeeds; // tokenToPriceFeed
