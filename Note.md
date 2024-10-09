@@ -23,3 +23,6 @@
 ```cmd
 forge install openzeppelin/opezeppelin-contracts --no-commit
 ```
+
+## solidity code format
+>forge fmt
