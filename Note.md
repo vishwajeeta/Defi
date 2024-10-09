@@ -24,5 +24,15 @@
 forge install openzeppelin/opezeppelin-contracts --no-commit
 ```
 
+## adding price-feed
+```cmd
+forge install smartcontractkit/chainlink-brownie-contracts@0.6.1 --no-commit
+```
+
+## if it can't be installed then use:-
+```cmd
+git config --global http.postBuffer 157286400
+```
+
 ## solidity code format
 >forge fmt
