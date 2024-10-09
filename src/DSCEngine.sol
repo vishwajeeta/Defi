@@ -124,6 +124,7 @@ contract DSCEngine is ReentrancyGuard {
 
     //-------------------public & External view functions----------------------------
     function getAccountCollateralValue(address user)public view returns(uint256){
-        // loop through each collateral
+        // loop through each collateral token , get the amount they had deposited and map it to
+        // the price to get USD value
     }
 }
