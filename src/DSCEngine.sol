@@ -28,6 +28,9 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__TransferFailed();
 
     //----------------State variable-----------------
+    uint256 private constant ADDITIONAL_FEED_PRECISION = 1e10;
+    uint256 private constant PRECISION = 1e18;
+
     mapping(address token => address priceFeed) s_priceFeeds; // tokenToPriceFeed
     mapping(address user => mapping(address token => uint256 amount)) private s_collateralDeposited;
     mapping(address user => uint256 amountDscMinted) private s_DscMinted;
@@ -125,6 +128,7 @@ contract DSCEngine is ReentrancyGuard {
         // Total Dsc minted
         // total collateral Value
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = _getAccountInformation(user);
+        return (collateralValueInUsd / totalDscMinted);
     }
 
     function _revertIfHealthFactorIsBroken(address user) internal view {
@@ -141,18 +145,24 @@ contract DSCEngine is ReentrancyGuard {
             uint256 amount = s_collateralDeposited[user][token];
         }
     }
-    function getUsdValue(address token,uint256 amount)public view returns(uint256){
+    function getUsdValue(address token,uint256 amount)public view returns(uint256 totalCollateralValueInUsd){
         //loop through each collateral token
         //get the amount they have deposited
         //map it to the price to get the USD value
         for (uint256 i=0;i<s_collateralTokens.length;i++){
             address token=s_collateralTokens[i];
             uint256 amount=s_collateralDeposited[user][token];
-            totalCollateralValueInUsd +=
+            totalCollateralValueInUsd +=getUsdValue(token,amount);
         }
+        return totalCollateralValueInUsd;
     }
     function getUsdValue(address token,uint256 amount)public view returns(uint256){
-
+        AggregatorV2Interface priceFeed=AggregatorV3Interface(s_priceFeeds[token]);
+        (,int256 price,,,)=priceFeed.latestRoundData();
+        // 1 eth = $1000
+        // returns value from CL will be 1000 * 1e8
+        return ((uint256(price) * ADDITIONAL_FEED_PRECISION) ADD * amount) / PRECISION;
     }
 }
 
+//1:40
