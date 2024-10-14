@@ -34,5 +34,11 @@ forge install smartcontractkit/chainlink-brownie-contracts@0.6.1 --no-commit
 git config --global http.postBuffer 157286400
 ```
 
+
+
+## install agrigator V3 interface to get the price of the token
+```cmd
+forge install smartcontractkit/chainlink-brownie-contracts@0.6.1 --no-commit
+```
 ## solidity code format
 >forge fmt
