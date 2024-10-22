@@ -26,10 +26,14 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__TokenAddressAndPriceFeedAddressesMustBeSameLength();
     error DSCEngine_NotAllowedToken();
     error DSCEngine__TransferFailed();
+    error DSCEngine__BreaksHealthFactor(uint256 healthFactor);
 
     //----------------State variable-----------------
     uint256 private constant ADDITIONAL_FEED_PRECISION = 1e10;
     uint256 private constant PRECISION = 1e18;
+    uint256 private constant LIQUIDATION_THRESHOLD = 50; //We need double the collateral
+    uint256 private constant LIQUIDATION_PRECISION = 100;
+    uint256 private constant MIN_HEALTH_FACTOR = 1;
 
     mapping(address token => address priceFeed) s_priceFeeds; // tokenToPriceFeed
     mapping(address user => mapping(address token => uint256 amount)) private s_collateralDeposited;
@@ -128,12 +132,18 @@ contract DSCEngine is ReentrancyGuard {
         // Total Dsc minted
         // total collateral Value
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = _getAccountInformation(user);
-        return (collateralValueInUsd / totalDscMinted);
+        // return (collateralValueInUsd / totalDscMinted);
+        uint256 collateralAdjustedForThreshold = (collatearlValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
+        return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
     }
 
+    // 1. check health factor (do they have enough collateral ?)
+    // 2.revert if they don't
     function _revertIfHealthFactorIsBroken(address user) internal view {
-        // 1. check health factor (do they have enough collateral ?)
-        // 2.revert if they don't
+        uint256 userHealthFactor = _healthFactor(user);
+        if (userHealthFactor < MIN_HEALTH_FACTOR) {
+            revert DSCEngine__BreaksHealthFactor(userHealthFactor);
+        }
     }
 
     //-------------------public & External view functions----------------------------
@@ -143,26 +153,17 @@ contract DSCEngine is ReentrancyGuard {
         for (uint256 i = 0; i < s_collateralTokens.length; i++) {
             address token = s_collateralTokens[i];
             uint256 amount = s_collateralDeposited[user][token];
+            totalCollateralValueInUsd += getUsdValue(token, amount);
         }
     }
-    function getUsdValue(address token,uint256 amount)public view returns(uint256 totalCollateralValueInUsd){
-        //loop through each collateral token
-        //get the amount they have deposited
-        //map it to the price to get the USD value
-        for (uint256 i=0;i<s_collateralTokens.length;i++){
-            address token=s_collateralTokens[i];
-            uint256 amount=s_collateralDeposited[user][token];
-            totalCollateralValueInUsd +=getUsdValue(token,amount);
-        }
-        return totalCollateralValueInUsd;
-    }
-    function getUsdValue(address token,uint256 amount)public view returns(uint256){
-        AggregatorV2Interface priceFeed=AggregatorV3Interface(s_priceFeeds[token]);
-        (,int256 price,,,)=priceFeed.latestRoundData();
+
+    function getUsdValue(address token, uint256 amount) public view returns (uint256) {
+        AggregatorV2Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
+        (, int256 price,,,) = priceFeed.latestRoundData();
         // 1 eth = $1000
         // returns value from CL will be 1000 * 1e8
-        return ((uint256(price) * ADDITIONAL_FEED_PRECISION) ADD * amount) / PRECISION;
+        return ((uint256(price) * ADDITIONAL_FEED_PRECISION) * amount) / PRECISION;
     }
 }
 
-//1:40
+//1:46
