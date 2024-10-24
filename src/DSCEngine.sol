@@ -19,14 +19,14 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
  * Our DSC system should always be "overcollateriat
  * @notice This contract is the core of the DSE System. it handles all the logic for minting and burning also redeeming DSC.+ depositing and withdrawing collateral.
  */
-
-contract DSCEngine is ReentrancyGuard{
+contract DSCEngine is ReentrancyGuard {
     //----------------Errors-------------------------
     error DSCEngine__NeedsMoreThanZero();
     error DSCEngine__TokenAddressAndPriceFeedAddressesMustBeSameLength();
     error DSCEngine_NotAllowedToken();
     error DSCEngine__TransferFailed();
     error DSCEngine__BreaksHealthFactor(uint256 healthFactor);
+    error DSCEngine__MintFailed();
 
     //----------------State variable-----------------
     uint256 private constant ADDITIONAL_FEED_PRECISION = 1e10;
@@ -107,6 +107,10 @@ contract DSCEngine is ReentrancyGuard{
         s_DscMinted[msg.sender] += amountDscToMint;
         // if they minted too much ($150 DSC , $100 ETH)
         _revertIfHealthFactorIsBroken(msg.sender);
+        bool minted = i_dsc.mint(msg.sender, amountDscToMint);
+        if (!minted) {
+            revert DSCEngine__MintFailed();
+        }
     }
 
     function burnDsc() external {}
