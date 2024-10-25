@@ -15,7 +15,7 @@
 ## Burn
 ## onlyOwner
 ## liquidity
-## clotral
+## collateral
 
 ## Foundry
 ## vite.js || Next.js
