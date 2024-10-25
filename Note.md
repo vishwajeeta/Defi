@@ -17,6 +17,7 @@
 ## liquidity
 ## collateral
 ## HealthFactor(user)
+## priceManagement | stability(price) in Auto mode
 
 ## Foundry
 ## vite.js || Next.js
