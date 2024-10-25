@@ -16,6 +16,7 @@
 ## onlyOwner
 ## liquidity
 ## collateral
+## HealthFactor(user)
 
 ## Foundry
 ## vite.js || Next.js
