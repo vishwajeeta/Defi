@@ -44,6 +44,7 @@ contract DSCEngine is ReentrancyGuard {
 
     //----------------Events--------------------------
     event CollateralDeposited(address indexed user, address indexed token, uint256 amount);
+    event CollateralRedeemed(address indexed user,address indexed token,uint256 indexed amount);
     //----------------Modifiers-----------------------
 
     modifier moreThanZero(uint256 amount) {
@@ -110,7 +111,15 @@ contract DSCEngine is ReentrancyGuard {
     }
 
     function redeemCollateralForDsc() external {}
-    function redeemCollateral() external {}
+    
+    // in order to redeem collateral:
+    // 1. health factor must be over 1 AFTER collateral pulled
+    // DRY
+    // CEI: Check, Effects, Interactions
+    function redeemCollateral(address tokenCollateralAddress,uint256 amountCollateral) external moreThanZero(amountCollateral) nonReentrant{
+        s_collateralDeposited[msg.sender][tokenCollateralAddress]-=amountCollateral;
+        emit CollateralRedeemed(msg.sender,tokenCollateralAddress,amountCollateral);
+    }
     /**
      * @notice follows CEI
      * @param amountDscToMint the amount of decentralized stablecoin to mint
@@ -185,4 +194,4 @@ contract DSCEngine is ReentrancyGuard {
     }
 }
 
-//1:46
+//2:16
