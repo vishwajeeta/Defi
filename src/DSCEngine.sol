@@ -110,15 +110,31 @@ contract DSCEngine is ReentrancyGuard {
         }
     }
 
-    function redeemCollateralForDsc() external {}
+    /**
+    * @param tokenCollateralAddress The collateral address to redeem
+    * @param amountCollateral The amount of collateral to redeem
+    * @param amountDscToBurn The amount of DSC to burn
+    * This function burns DSC and redeem underlying collateral in one transaction
+     */
+    function redeemCollateralForDsc(address tokenCollateralAddress,uint256 amountCollateral,uint256 amountDscToBurn) external {
+        burnDsc(amountDscToBurn);
+        redeemCollateral(tokenCollateralAddress, amountCollateral);
+        //healthFactor is already checked in redeemCollateral()
+    }
     
     // in order to redeem collateral:
     // 1. health factor must be over 1 AFTER collateral pulled
     // DRY
     // CEI: Check, Effects, Interactions
-    function redeemCollateral(address tokenCollateralAddress,uint256 amountCollateral) external moreThanZero(amountCollateral) nonReentrant{
+    function redeemCollateral(address tokenCollateralAddress,uint256 amountCollateral) public moreThanZero(amountCollateral) nonReentrant{
         s_collateralDeposited[msg.sender][tokenCollateralAddress]-=amountCollateral;
         emit CollateralRedeemed(msg.sender,tokenCollateralAddress,amountCollateral);
+        // _calculateHealthFactorAfter()
+        bool sucess=IERC20(tokenCollateralAddress).transfer(msg.sender, amountCollateral);
+        if(!sucess){
+            revert DSCEngine__TransferFailed();
+        }
+        _revertIfHealthFactorIsBroken(msg.sender);
     }
     /**
      * @notice follows CEI
@@ -136,7 +152,15 @@ contract DSCEngine is ReentrancyGuard {
         }
     }
 
-    function burnDsc() external {}
+    function burnDsc(uint256 amount) public moreThanZero(amount) {
+        s_DSCMinted[msg.sender]-=amount;
+        bool sucess =i_dsc.transferFrom(msg.sender, address(this), amount);
+        if(!sucess){
+            revert DSCEngine__TransferFailed();
+        }
+        i_dsc.burn(amount);
+        _revertIfHealthFactorIsBroken(msg.sender);//probably not need to use this line
+    }
     function lizuidate() external {}
     function getHealthFactor() external view {}
 
