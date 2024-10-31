@@ -44,7 +44,7 @@ contract DSCEngine is ReentrancyGuard {
 
     //----------------Events--------------------------
     event CollateralDeposited(address indexed user, address indexed token, uint256 amount);
-    event CollateralRedeemed(address indexed user,address indexed token,uint256 indexed amount);
+    event CollateralRedeemed(address indexed user, address indexed token, uint256 indexed amount);
     //----------------Modifiers-----------------------
 
     modifier moreThanZero(uint256 amount) {
@@ -77,12 +77,13 @@ contract DSCEngine is ReentrancyGuard {
 
     //----------------External functions---------------
 
-    /**
+    /*
      * @param tokenCollateralAddress The address of the token to deposit as collateral
      * @param amountCollateral The amount of collateral to deposit
      * @param amountDscToMint The amount of decentralized stable coin to mint
      * @note this function will deposit your collateral and mint DSC in one transaction
      */
+
     function depositCollateralAndMintDsc(
         address tokenCollateralAddress,
         uint256 amountCollateral,
@@ -111,27 +112,33 @@ contract DSCEngine is ReentrancyGuard {
     }
 
     /**
-    * @param tokenCollateralAddress The collateral address to redeem
-    * @param amountCollateral The amount of collateral to redeem
-    * @param amountDscToBurn The amount of DSC to burn
-    * This function burns DSC and redeem underlying collateral in one transaction
+     * @param tokenCollateralAddress The collateral address to redeem
+     * @param amountCollateral The amount of collateral to redeem
+     * @param amountDscToBurn The amount of DSC to burn
+     * This function burns DSC and redeem underlying collateral in one transaction
      */
-    function redeemCollateralForDsc(address tokenCollateralAddress,uint256 amountCollateral,uint256 amountDscToBurn) external {
+    function redeemCollateralForDsc(address tokenCollateralAddress, uint256 amountCollateral, uint256 amountDscToBurn)
+        external
+    {
         burnDsc(amountDscToBurn);
         redeemCollateral(tokenCollateralAddress, amountCollateral);
         //healthFactor is already checked in redeemCollateral()
     }
-    
+
     // in order to redeem collateral:
     // 1. health factor must be over 1 AFTER collateral pulled
     // DRY
     // CEI: Check, Effects, Interactions
-    function redeemCollateral(address tokenCollateralAddress,uint256 amountCollateral) public moreThanZero(amountCollateral) nonReentrant{
-        s_collateralDeposited[msg.sender][tokenCollateralAddress]-=amountCollateral;
-        emit CollateralRedeemed(msg.sender,tokenCollateralAddress,amountCollateral);
+    function redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral)
+        public
+        moreThanZero(amountCollateral)
+        nonReentrant
+    {
+        s_collateralDeposited[msg.sender][tokenCollateralAddress] -= amountCollateral;
+        emit CollateralRedeemed(msg.sender, tokenCollateralAddress, amountCollateral);
         // _calculateHealthFactorAfter()
-        bool sucess=IERC20(tokenCollateralAddress).transfer(msg.sender, amountCollateral);
-        if(!sucess){
+        bool sucess = IERC20(tokenCollateralAddress).transfer(msg.sender, amountCollateral);
+        if (!sucess) {
             revert DSCEngine__TransferFailed();
         }
         _revertIfHealthFactorIsBroken(msg.sender);
@@ -153,14 +160,15 @@ contract DSCEngine is ReentrancyGuard {
     }
 
     function burnDsc(uint256 amount) public moreThanZero(amount) {
-        s_DSCMinted[msg.sender]-=amount;
-        bool sucess =i_dsc.transferFrom(msg.sender, address(this), amount);
-        if(!sucess){
+        s_DscMinted[msg.sender] -= amount;
+        bool sucess = i_dsc.transferFrom(msg.sender, address(this), amount);
+        if (!sucess) {
             revert DSCEngine__TransferFailed();
         }
         i_dsc.burn(amount);
-        _revertIfHealthFactorIsBroken(msg.sender);//probably not need to use this line
+        _revertIfHealthFactorIsBroken(msg.sender); //probably not need to use this line
     }
+
     function lizuidate() external {}
     function getHealthFactor() external view {}
 
