@@ -27,13 +27,14 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__TransferFailed();
     error DSCEngine__BreaksHealthFactor(uint256 healthFactor);
     error DSCEngine__MintFailed();
+    error DSCEngine__HealthFactorOk();
 
     //----------------State variable-----------------
     uint256 private constant ADDITIONAL_FEED_PRECISION = 1e10;
     uint256 private constant PRECISION = 1e18;
     uint256 private constant LIQUIDATION_THRESHOLD = 50; //We need double the collateral
     uint256 private constant LIQUIDATION_PRECISION = 100;
-    uint256 private constant MIN_HEALTH_FACTOR = 1;
+    uint256 private constant MIN_HEALTH_FACTOR = 1e18;
 
     mapping(address token => address priceFeed) s_priceFeeds; // tokenToPriceFeed
     mapping(address user => mapping(address token => uint256 amount)) private s_collateralDeposited;
@@ -169,7 +170,16 @@ contract DSCEngine is ReentrancyGuard {
         _revertIfHealthFactorIsBroken(msg.sender); //probably not need to use this line
     }
 
-    function lizuidate() external {}
+    function lizuidate(address collateral,address user,uint256 debtToCover) external moreThanZero(debtToCover) nonReentrant{
+        // check health factor of the user
+        uint256 startingUserHealthFactor=_HealthFactor(user);
+        if(startingUserHealthFactor >= MIN_HEALTH_FACTOR){
+            revert DSCEngine__HealthFactorOk();
+        }
+        // we want to burn their DSC "debt"
+        // And take their collateral
+        // 
+    }
     function getHealthFactor() external view {}
 
     //------------------------Private & Internal view functions-------------------
